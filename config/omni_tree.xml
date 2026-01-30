@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<PARENT>
+	<tree>
+		<omni>
+			<host>
+				<instance_id type="string" size="8" value="omni" />
+			</host>
+			<web>
+				<port type="uint16" value="80" />
+			</web>
+			<network>
+				<interface type="string" size="40" value="127.0.0.1" />
+				<synchronisation_port type="uint16" value="1042" />
+			</network>
+		</omni>
+	</tree>
+</PARENT>

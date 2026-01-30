@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<omni_root>
+	<!--
+		default includes must be at the bottom of the document,
+		otherwise they override custom definitions.
+	-->
+	<INCLUDE path="omni_tree.xml" />
+</omni_root>
