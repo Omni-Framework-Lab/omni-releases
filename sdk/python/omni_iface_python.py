@@ -14,6 +14,12 @@ class Iface:
 
 		### 
 
+		self.lib.omni_init_set_instance_id.argtypes = [ctypes.c_char_p]
+		self.lib.omni_init_set_instance_id.restype = None
+
+		self.lib.omni_init_mode_owner.argtypes = [ctypes.c_char_p]
+		self.lib.omni_init_mode_owner.restype = None
+
 		self.lib.omni_find_tree.argtypes = [ctypes.c_char_p]
 		self.lib.omni_find_tree.restype  = ctypes.c_void_p
 

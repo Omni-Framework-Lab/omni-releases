@@ -18,7 +18,8 @@ static const uint32_t OMNI_VARIABLE_MAX_SIZE = 256;
 // The API.
 ///////////////////////////////////////////////////////////////////////
 
-void OmniIface_Initialize(int argc, char** argv);
+void omni_init_set_instance_id(const char* instance_id);
+void omni_init_mode_owner(const char* config_file_path);
 
 Omni_Tree* omni_find_tree(const char* tree_id);
 void omni_tree_free(Omni_Tree* tree);

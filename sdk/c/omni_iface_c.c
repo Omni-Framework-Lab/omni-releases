@@ -8,7 +8,10 @@
 extern "C" {
 #endif
 
-typedef void (*OmniIface_init_t)(int argc, char** argv);
+//typedef void (*OmniIface_init_t)(int argc, char** argv);
+
+typedef void (*OmniIface_init_set_instance_id_t)(const char* instance_id);
+typedef void (*OmniIface_init_mode_owner_t)(const char* config_file_path);
 
 typedef Omni_Tree* (*OmniIface_find_tree_t)(const char* tree_id);
 typedef void (*OmniIface_free_tree_t)(Omni_Tree* tree);
@@ -61,7 +64,10 @@ typedef void (*OmniIface_write_variable_string_t)(Omni_Variable* variable, const
 
 struct LoadedDLL
 {
-	OmniIface_init_t init;
+	//OmniIface_init_t init;
+
+	OmniIface_init_set_instance_id_t init_set_instance_id;
+	OmniIface_init_mode_owner_t init_mode_owner;
 
 	OmniIface_find_tree_t find_tree;
 	OmniIface_free_tree_t free_tree;
@@ -113,7 +119,8 @@ struct LoadedDLL
 	OmniIface_write_variable_string_t write_variable_string;
 } _iface;
 
-void OmniIface_Initialize(int argc, char** argv)
+/*! Loads the dynamic library and initializes its function references. */
+static void omni_iface_init()
 {
 #ifdef _WIN32
 	static HINSTANCE dll = NULL;
@@ -122,7 +129,10 @@ void OmniIface_Initialize(int argc, char** argv)
 		dll = LoadLibrary("omni_core_iface_c.dll");
 		if (dll)
 		{
-			_iface.init = (OmniIface_init_t)GetProcAddress(dll, "omni_init");
+			//_iface.init = (OmniIface_init_t)GetProcAddress(dll, "omni_init");
+
+			_iface.init_set_instance_id = (OmniIface_init_set_instance_id_t)GetProcAddress(dll, "omni_init_set_instance_id");
+			_iface.init_mode_owner = (OmniIface_init_mode_owner_t)GetProcAddress(dll, "omni_init_mode_owner");
 
 			_iface.find_tree = (OmniIface_find_tree_t)GetProcAddress(dll, "omni_find_tree");
 			_iface.free_tree = (OmniIface_free_tree_t)GetProcAddress(dll, "omni_tree_free");
@@ -173,13 +183,26 @@ void OmniIface_Initialize(int argc, char** argv)
 			_iface.write_variable_double = (OmniIface_write_variable_double_t)GetProcAddress(dll, "omni_write_variable_double");
 			_iface.write_variable_string = (OmniIface_write_variable_string_t)GetProcAddress(dll, "omni_write_variable_string");
 		}
-		_iface.init(argc, argv);
+		//_iface.init(argc, argv);
 	}
 #endif
 }
 
+void omni_init_set_instance_id(const char* instance_id)
+{
+	omni_iface_init();
+	_iface.init_set_instance_id(instance_id);
+}
+
+void omni_init_mode_owner(const char* config_file_path)
+{
+	omni_iface_init();
+	_iface.init_mode_owner(config_file_path);
+}
+
 Omni_Tree* omni_find_tree(const char* tree_id)
 {
+	omni_iface_init();
 	return _iface.find_tree(tree_id);
 }
 

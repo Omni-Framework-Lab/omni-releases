@@ -9,6 +9,12 @@
 			<network>
 				<interface type="string" size="40" value="127.0.0.1" />
 				<synchronisation_port type="uint16" value="1042" />
+				<sync>
+					<strategy type="string" size="32" value="simple" />
+					<simple>
+						<synchronisation_port type="uint16" value="1042" />
+					</simple>
+				</sync>
 			</network>
 		</omni>
 	</tree>
