@@ -172,8 +172,8 @@ namespace omni
 			}
 			else if constexpr (std::is_same<T, std::string>())
 			{
-				char buf[DTREE_VARIABLE_MAX_SIZE];
-				omni_read_variable_string(_cvar, buf, DTREE_VARIABLE_MAX_SIZE);
+				char buf[OMNI_VARIABLE_MAX_SIZE];
+				omni_read_variable_string(_cvar, buf, OMNI_VARIABLE_MAX_SIZE);
 				return std::string(buf);
 			}
 			else
