@@ -12,6 +12,21 @@ extern "C" {
 typedef struct Omni_Tree Omni_Tree;
 typedef struct Omni_Variable Omni_Variable;
 
+enum Omni_VariableType
+{
+	OMNI_INT8,
+	OMNI_UINT8,
+	OMNI_INT16,
+	OMNI_UINT16,
+	OMNI_INT32,
+	OMNI_UINT32,
+	OMNI_INT64,
+	OMNI_UINT64,
+	OMNI_FLOAT,
+	OMNI_DOUBLE,
+	OMNI_STRING,
+};
+
 static const uint32_t OMNI_VARIABLE_MAX_SIZE = 256;
 
 ///////////////////////////////////////////////////////////////////////
