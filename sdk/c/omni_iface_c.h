@@ -33,6 +33,7 @@ static const uint32_t OMNI_VARIABLE_MAX_SIZE = 256;
 // The API.
 ///////////////////////////////////////////////////////////////////////
 
+void omni_init_set_library_path(const char* library_path);
 void omni_init_set_instance_id(const char* instance_id);
 void omni_init_mode_owner(const char* config_file_path);
 

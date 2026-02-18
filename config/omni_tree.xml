@@ -4,7 +4,7 @@
 		<omni>
 			<webui>
 				<port type="uint16" value="8080" />
-				<webapp_directory type="string" size="255" value="{omni_home_dir}/webui" />
+				<webapp_directory type="string" size="255" value="{cwd}/../../webui" />
 			</webui>
 			<network>
 				<interface type="string" size="40" value="127.0.0.1" />

@@ -119,6 +119,8 @@ struct LoadedDLL
 	OmniIface_write_variable_string_t write_variable_string;
 } _iface;
 
+static char load_library_path[256] = "omni_core_iface_c.dll";
+
 /*! Loads the dynamic library and initializes its function references. */
 static void omni_iface_init()
 {
@@ -126,7 +128,7 @@ static void omni_iface_init()
 	static HINSTANCE dll = NULL;
 	if (!dll)
 	{
-		dll = LoadLibraryA("omni_core_iface_c.dll");
+		dll = LoadLibraryA(load_library_path);
 		if (dll)
 		{
 			//_iface.init = (OmniIface_init_t)GetProcAddress(dll, "omni_init");
@@ -186,6 +188,11 @@ static void omni_iface_init()
 		//_iface.init(argc, argv);
 	}
 #endif
+}
+
+void omni_init_set_library_path(const char* library_path)
+{
+	strcpy(load_library_path, library_path);
 }
 
 void omni_init_set_instance_id(const char* instance_id)

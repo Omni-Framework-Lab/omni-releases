@@ -11,6 +11,9 @@ namespace omni
 		std::string _id;
 		Omni_Tree* _ctree = nullptr;
 
+		Tree()
+		{}
+
 		Tree(std::string id)
 			: _id(id)
 		{
@@ -23,11 +26,15 @@ namespace omni
 
 		Tree& operator=(const Tree& other)
 		{
-			if (this != &other)
+			if (this == &other)
+				return *this;
+
+			if (_ctree)
 			{
-				_id = other._id;
-				_ctree = omni_find_tree(_id.c_str());
+				omni_tree_free(_ctree);
 			}
+			_id = other._id;
+			_ctree = omni_find_tree(_id.c_str());
 			return *this;
 		}
 
@@ -46,11 +53,14 @@ namespace omni
 	template<typename T>
 	class VariableT
 	{
-		const Tree _tree;
-		const std::string _path;
+		Tree _tree;
+		std::string _path;
 		Omni_Variable* _cvar = nullptr;
 
 	public:
+		VariableT()
+		{}
+
 		VariableT(const Tree& tree, const std::string& path)
 			: _tree(tree)
 			, _path(path)
@@ -115,6 +125,10 @@ namespace omni
 		{
 			if (this != &other)
 			{
+				if (_cvar)
+				{
+					omni_variable_free(_cvar);
+				}
 				_tree = other._tree;
 				_path = other._path;
 				_cvar = omni_variable_clone(other._cvar);
@@ -126,6 +140,11 @@ namespace omni
 		{
 			if (_cvar)
 				omni_variable_free(_cvar);
+		}
+
+		bool is_valid() const
+		{
+			return _cvar != nullptr;
 		}
 
 		T get() const
