@@ -126,7 +126,7 @@ static void omni_iface_init()
 	static HINSTANCE dll = NULL;
 	if (!dll)
 	{
-		dll = LoadLibrary("omni_core_iface_c.dll");
+		dll = LoadLibraryA("omni_core_iface_c.dll");
 		if (dll)
 		{
 			//_iface.init = (OmniIface_init_t)GetProcAddress(dll, "omni_init");
