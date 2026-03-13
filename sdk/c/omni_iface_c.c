@@ -30,6 +30,15 @@ typedef Omni_Variable* (*OmniIface_find_variable_float_t)(Omni_Tree* tree, const
 typedef Omni_Variable* (*OmniIface_find_variable_double_t)(Omni_Tree* tree, const char* path);
 typedef Omni_Variable* (*OmniIface_find_variable_string_t)(Omni_Tree* tree, const char* path);
 
+typedef Omni_Variable** (*OmniIface_list_variables_t)(Omni_Tree* tree, int* len);
+typedef void (*OmniIface_free_variables_t)(Omni_Variable** variables);
+
+typedef const char* (*OmniIface_variable_path_t)(Omni_Variable* variable);
+typedef uint8_t (*OmniIface_variable_type_t)(Omni_Variable* variable);
+typedef uint16_t (*OmniIface_variable_size_t)(Omni_Variable* variable);
+typedef uint8_t (*OmniIface_variable_is_alias_t)(Omni_Variable* variable);
+typedef const char* (*OmniIface_variable_alias_target_path_t)(Omni_Variable* variable);
+
 typedef void (*OmniIface_variable_free_t)(Omni_Variable* variable);
 typedef Omni_Variable* (*OmniIface_variable_clone_t)(Omni_Variable* variable);
 typedef int (*OmniIface_variable_has_changed_t)(Omni_Variable* variable);
@@ -85,6 +94,15 @@ struct LoadedDLL
 	OmniIface_find_variable_float_t find_variable_float;
 	OmniIface_find_variable_double_t find_variable_double;
 	OmniIface_find_variable_string_t find_variable_string;
+
+	OmniIface_list_variables_t list_variables;
+	OmniIface_free_variables_t free_variables;
+
+	OmniIface_variable_path_t variable_path;
+	OmniIface_variable_type_t variable_type;
+	OmniIface_variable_size_t variable_size;
+	OmniIface_variable_is_alias_t variable_is_alias;
+	OmniIface_variable_alias_target_path_t variable_alias_target_path;
 
 	OmniIface_variable_free_t variable_free;
 	OmniIface_variable_clone_t variable_clone;
@@ -152,6 +170,15 @@ static void omni_iface_init()
 			_iface.find_variable_float = (OmniIface_find_variable_float_t)GetProcAddress(dll, "omni_find_variable_float");
 			_iface.find_variable_double = (OmniIface_find_variable_double_t)GetProcAddress(dll, "omni_find_variable_double");
 			_iface.find_variable_string = (OmniIface_find_variable_string_t)GetProcAddress(dll, "omni_find_variable_string");
+
+			_iface.list_variables = (OmniIface_list_variables_t)GetProcAddress(dll, "omni_list_variables");
+			_iface.free_variables = (OmniIface_free_variables_t)GetProcAddress(dll, "omni_free_variables");
+
+			_iface.variable_path = (OmniIface_variable_path_t)GetProcAddress(dll, "omni_variable_path");
+			_iface.variable_type = (OmniIface_variable_type_t)GetProcAddress(dll, "omni_variable_type");
+			_iface.variable_size = (OmniIface_variable_size_t)GetProcAddress(dll, "omni_variable_size");
+			_iface.variable_is_alias = (OmniIface_variable_is_alias_t)GetProcAddress(dll, "omni_variable_is_alias");
+			_iface.variable_alias_target_path = (OmniIface_variable_alias_target_path_t)GetProcAddress(dll, "omni_variable_alias_target_path");
 
 			_iface.variable_free = (OmniIface_variable_free_t)GetProcAddress(dll, "omni_variable_free");
 			_iface.variable_clone = (OmniIface_variable_clone_t)GetProcAddress(dll, "omni_variable_clone");
@@ -271,6 +298,41 @@ Omni_Variable* omni_find_variable_double(Omni_Tree* tree, const char* path)
 Omni_Variable* omni_find_variable_string(Omni_Tree* tree, const char* path)
 {
 	return _iface.find_variable_string(tree, path);
+}
+
+Omni_Variable** omni_list_variables(Omni_Tree* tree, int* len)
+{
+	return _iface.list_variables(tree, len);
+}
+
+void omni_free_variables(Omni_Variable** vars)
+{
+	_iface.free_variables(vars);
+}
+
+const char* omni_variable_path(Omni_Variable* variable)
+{
+	return _iface.variable_path(variable);
+}
+
+uint8_t omni_variable_type(Omni_Variable* variable)
+{
+	return _iface.variable_type(variable);
+}
+
+uint16_t omni_variable_size(Omni_Variable* variable)
+{
+	return _iface.variable_size(variable);
+}
+
+uint8_t omni_variable_is_alias(Omni_Variable* variable)
+{
+	return _iface.variable_is_alias(variable);
+}
+
+const char* omni_variable_alias_target_path(Omni_Variable* variable)
+{
+	return _iface.variable_alias_target_path(variable);
 }
 
 void omni_variable_free(Omni_Variable* variable)

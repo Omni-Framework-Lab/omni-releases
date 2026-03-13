@@ -54,6 +54,15 @@ Omni_Variable* omni_find_variable_float(Omni_Tree* tree, const char* path);
 Omni_Variable* omni_find_variable_double(Omni_Tree* tree, const char* path);
 Omni_Variable* omni_find_variable_string(Omni_Tree* tree, const char* path);
 
+Omni_Variable** omni_list_variables(Omni_Tree* tree, int* len);
+void omni_free_variables(Omni_Variable** vars);
+
+const char* omni_variable_path(Omni_Variable* variable);
+uint8_t omni_variable_type(Omni_Variable* variable);
+uint16_t omni_variable_size(Omni_Variable* variable);
+uint8_t omni_variable_is_alias(Omni_Variable* variable);
+const char* omni_variable_alias_target_path(Omni_Variable* variable);
+
 void omni_variable_free(Omni_Variable* variable);
 Omni_Variable* omni_variable_clone(Omni_Variable* variable);
 int omni_variable_has_changed(Omni_Variable* variable);

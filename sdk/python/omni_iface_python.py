@@ -14,6 +14,9 @@ class Iface:
 
 		### 
 
+		#self.lib.omni_init_set_library_path.argtypes = [ctypes.c_char_p]
+		#self.lib.omni_init_set_library_path.restype = None
+
 		self.lib.omni_init_set_instance_id.argtypes = [ctypes.c_char_p]
 		self.lib.omni_init_set_instance_id.restype = None
 
@@ -22,6 +25,9 @@ class Iface:
 
 		self.lib.omni_find_tree.argtypes = [ctypes.c_char_p]
 		self.lib.omni_find_tree.restype  = ctypes.c_void_p
+
+		self.lib.omni_tree_free.argtypes = [ctypes.c_void_p]
+		self.lib.omni_tree_free.restype = None
 
 		self.lib.omni_find_variable_i8.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
 		self.lib.omni_find_variable_i8.restype  = ctypes.c_void_p
@@ -56,7 +62,40 @@ class Iface:
 		self.lib.omni_find_variable_string.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
 		self.lib.omni_find_variable_string.restype  = ctypes.c_void_p
 
-		### READ
+		#self.lib.omni_list_variables.argtypes = [ctypes.c_void_p, ctypes.???]
+		#self.lib.omni_list_variables.restype = ctypes.c_void_p
+
+		self.lib.omni_free_variables.argtypes = [ctypes.c_void_p]
+		self.lib.omni_free_variables.restype = None
+
+		self.lib.omni_variable_path.argtypes = [ctypes.c_void_p]
+		self.lib.omni_variable_path.restype = ctypes.c_char_p
+
+		self.lib.omni_variable_type.argtypes = [ctypes.c_void_p]
+		self.lib.omni_variable_type.restype = ctypes.c_uint8
+
+		self.lib.omni_variable_size.argtypes = [ctypes.c_void_p]
+		self.lib.omni_variable_size.restype = ctypes.c_uint16
+
+		self.lib.omni_variable_is_alias.argtypes = [ctypes.c_void_p]
+		self.lib.omni_variable_is_alias.restype = ctypes.c_uint8
+
+		self.lib.omni_variable_alias_target_path.argtypes = [ctypes.c_void_p]
+		self.lib.omni_variable_alias_target_path.restype = ctypes.c_char_p
+
+		self.lib.omni_variable_free.argtypes = [ctypes.c_void_p]
+		self.lib.omni_variable_free.restype = None
+
+		# self.lib.XXX.argtypes = []
+		# self.lib.XXX.restype = None
+
+		# self.lib.XXX.argtypes = []
+		# self.lib.XXX.restype = None
+
+		# self.lib.XXX.argtypes = []
+		# self.lib.XXX.restype = None
+
+
 
 		self.lib.omni_read_variable_i8.argtypes = [ctypes.c_void_p]
 		self.lib.omni_read_variable_i8.restype = ctypes.c_int8
