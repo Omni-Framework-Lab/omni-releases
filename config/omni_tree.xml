@@ -3,18 +3,27 @@
 	<tree>
 		<omni>
 			<webui>
-				<port type="uint16" value="8080" />
-				<webapp_directory type="string" size="255" value="{cwd}/../../webui" />
+				<interface type="string" size="40" value="127.0.0.1"/>
+				<port type="uint16" value="8080"/>
+				<webapp_directory type="string" size="255" value="{cwd}/../../webui"/>
 			</webui>
 			<network>
-				<interface type="string" size="40" value="127.0.0.1" />
-				<synchronisation_port type="uint16" value="1042" />
-				<sync>
-					<strategy type="string" size="32" value="simple" />
-					<simple>
-						<synchronisation_port type="uint16" value="1042" />
-					</simple>
-				</sync>
+				<master>
+					<host type="string" size="40" value="pc_1" />
+					<command_bind_port type="uint16" value="4201" description="TCP Server port of command/control connection from slaves."/>
+				</master>
+				<multicast_group_address type="string" size="40" value="239.255.42.42"/>
+				<multicast_group_port type="uint16" value="4201"/>
+				<host>
+					<pc_1>
+						<id type="uint16" value="1"/>
+						<interface type="string" size="40" value="192.168.42.210"/>
+					</pc_1>
+					<pc_2>
+						<id type="uint16" value="2"/>
+						<interface type="string" size="40" value="192.168.42.228"/>
+					</pc_2>
+				</host>
 			</network>
 		</omni>
 	</tree>

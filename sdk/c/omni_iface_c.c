@@ -1,14 +1,24 @@
 #include "omni_iface_c.h"
+#include <inttypes.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #include <Windows.h>
+#elif defined(__linux__)
+#include <dlfcn.h>
+#endif
+
+#if defined(_WIN32)
+#define _find_symbol GetProcAddress
+#elif defined(__linux__)
+#define _find_symbol dlsym
 #endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-//typedef void (*OmniIface_init_t)(int argc, char** argv);
 
 typedef void (*OmniIface_init_set_instance_id_t)(const char* instance_id);
 typedef void (*OmniIface_init_mode_owner_t)(const char* config_file_path);
@@ -137,84 +147,97 @@ struct LoadedDLL
 	OmniIface_write_variable_string_t write_variable_string;
 } _iface;
 
+#if defined(_WIN32)
 static char load_library_path[256] = "omni_core_iface_c.dll";
+#elif defined(__linux__)
+static char load_library_path[256] = "libomni_core_iface_c.so";
+static char load_library_path_binary_dir[256] = "./libomni_core_iface_c.so";
+#endif
 
 /*! Loads the dynamic library and initializes its function references. */
 static void omni_iface_init()
 {
-#ifdef _WIN32
+#if defined(_WIN32)
 	static HINSTANCE dll = NULL;
 	if (!dll)
 	{
 		dll = LoadLibraryA(load_library_path);
-		if (dll)
-		{
-			//_iface.init = (OmniIface_init_t)GetProcAddress(dll, "omni_init");
-
-			_iface.init_set_instance_id = (OmniIface_init_set_instance_id_t)GetProcAddress(dll, "omni_init_set_instance_id");
-			_iface.init_mode_owner = (OmniIface_init_mode_owner_t)GetProcAddress(dll, "omni_init_mode_owner");
-
-			_iface.find_tree = (OmniIface_find_tree_t)GetProcAddress(dll, "omni_find_tree");
-			_iface.free_tree = (OmniIface_free_tree_t)GetProcAddress(dll, "omni_tree_free");
-
-			_iface.find_variable_i8 = (OmniIface_find_variable_i8_t)GetProcAddress(dll, "omni_find_variable_i8");
-			_iface.find_variable_i16 = (OmniIface_find_variable_i16_t)GetProcAddress(dll, "omni_find_variable_i16");
-			_iface.find_variable_i32 = (OmniIface_find_variable_i32_t)GetProcAddress(dll, "omni_find_variable_i32");
-			_iface.find_variable_i64 = (OmniIface_find_variable_i64_t)GetProcAddress(dll, "omni_find_variable_i64");
-
-			_iface.find_variable_u8 = (OmniIface_find_variable_u8_t)GetProcAddress(dll, "omni_find_variable_u8");
-			_iface.find_variable_u16 = (OmniIface_find_variable_u16_t)GetProcAddress(dll, "omni_find_variable_u16");
-			_iface.find_variable_u32 = (OmniIface_find_variable_u32_t)GetProcAddress(dll, "omni_find_variable_u32");
-			_iface.find_variable_u64 = (OmniIface_find_variable_u64_t)GetProcAddress(dll, "omni_find_variable_u64");
-
-			_iface.find_variable_float = (OmniIface_find_variable_float_t)GetProcAddress(dll, "omni_find_variable_float");
-			_iface.find_variable_double = (OmniIface_find_variable_double_t)GetProcAddress(dll, "omni_find_variable_double");
-			_iface.find_variable_string = (OmniIface_find_variable_string_t)GetProcAddress(dll, "omni_find_variable_string");
-
-			_iface.list_variables = (OmniIface_list_variables_t)GetProcAddress(dll, "omni_list_variables");
-			_iface.free_variables = (OmniIface_free_variables_t)GetProcAddress(dll, "omni_free_variables");
-
-			_iface.variable_path = (OmniIface_variable_path_t)GetProcAddress(dll, "omni_variable_path");
-			_iface.variable_type = (OmniIface_variable_type_t)GetProcAddress(dll, "omni_variable_type");
-			_iface.variable_size = (OmniIface_variable_size_t)GetProcAddress(dll, "omni_variable_size");
-			_iface.variable_is_alias = (OmniIface_variable_is_alias_t)GetProcAddress(dll, "omni_variable_is_alias");
-			_iface.variable_alias_target_path = (OmniIface_variable_alias_target_path_t)GetProcAddress(dll, "omni_variable_alias_target_path");
-
-			_iface.variable_free = (OmniIface_variable_free_t)GetProcAddress(dll, "omni_variable_free");
-			_iface.variable_clone = (OmniIface_variable_clone_t)GetProcAddress(dll, "omni_variable_clone");
-			_iface.variable_has_changed = (OmniIface_variable_has_changed_t)GetProcAddress(dll, "omni_variable_has_changed");
-
-			_iface.read_variable_i8 = (OmniIface_read_variable_i8_t)GetProcAddress(dll, "omni_read_variable_i8");
-			_iface.read_variable_i16 = (OmniIface_read_variable_i16_t)GetProcAddress(dll, "omni_read_variable_i16");
-			_iface.read_variable_i32 = (OmniIface_read_variable_i32_t)GetProcAddress(dll, "omni_read_variable_i32");
-			_iface.read_variable_i64 = (OmniIface_read_variable_i64_t)GetProcAddress(dll, "omni_read_variable_i64");
-
-			_iface.read_variable_u8 = (OmniIface_read_variable_u8_t)GetProcAddress(dll, "omni_read_variable_u8");
-			_iface.read_variable_u16 = (OmniIface_read_variable_u16_t)GetProcAddress(dll, "omni_read_variable_u16");
-			_iface.read_variable_u32 = (OmniIface_read_variable_u32_t)GetProcAddress(dll, "omni_read_variable_u32");
-			_iface.read_variable_u64 = (OmniIface_read_variable_u64_t)GetProcAddress(dll, "omni_read_variable_u64");
-
-			_iface.read_variable_float = (OmniIface_read_variable_float_t)GetProcAddress(dll, "omni_read_variable_float");
-			_iface.read_variable_double = (OmniIface_read_variable_double_t)GetProcAddress(dll, "omni_read_variable_double");
-			_iface.read_variable_string = (OmniIface_read_variable_string_t)GetProcAddress(dll, "omni_read_variable_string");
-
-			_iface.write_variable_i8 = (OmniIface_write_variable_i8_t)GetProcAddress(dll, "omni_write_variable_i8");
-			_iface.write_variable_i16 = (OmniIface_write_variable_i16_t)GetProcAddress(dll, "omni_write_variable_i16");
-			_iface.write_variable_i32 = (OmniIface_write_variable_i32_t)GetProcAddress(dll, "omni_write_variable_i32");
-			_iface.write_variable_i64 = (OmniIface_write_variable_i64_t)GetProcAddress(dll, "omni_write_variable_i64");
-
-			_iface.write_variable_u8 = (OmniIface_write_variable_u8_t)GetProcAddress(dll, "omni_write_variable_u8");
-			_iface.write_variable_u16 = (OmniIface_write_variable_u16_t)GetProcAddress(dll, "omni_write_variable_u16");
-			_iface.write_variable_u32 = (OmniIface_write_variable_u32_t)GetProcAddress(dll, "omni_write_variable_u32");
-			_iface.write_variable_u64 = (OmniIface_write_variable_u64_t)GetProcAddress(dll, "omni_write_variable_u64");
-
-			_iface.write_variable_float = (OmniIface_write_variable_float_t)GetProcAddress(dll, "omni_write_variable_float");
-			_iface.write_variable_double = (OmniIface_write_variable_double_t)GetProcAddress(dll, "omni_write_variable_double");
-			_iface.write_variable_string = (OmniIface_write_variable_string_t)GetProcAddress(dll, "omni_write_variable_string");
-		}
-		//_iface.init(argc, argv);
-	}
+#elif defined(__linux__)
+	static void* dll = NULL;
+	if (!dll)
+	{
+		dll = dlopen(load_library_path, RTLD_LAZY);
+		if (!dll)
+			dll = dlopen(load_library_path_binary_dir, RTLD_LAZY);
 #endif
+		if (!dll)
+		{
+			fprintf(stderr, "Failed to load library: %s\n", load_library_path);
+			fprintf(stderr, "Make sure its in the same directory or on your PATH (Windows) or LD_LIBRARY_PATH (Linux) environment variable.\n");
+			exit(1);
+		}
+
+		_iface.init_set_instance_id = (OmniIface_init_set_instance_id_t)_find_symbol(dll, "omni_init_set_instance_id");
+		_iface.init_mode_owner = (OmniIface_init_mode_owner_t)_find_symbol(dll, "omni_init_mode_owner");
+
+		_iface.find_tree = (OmniIface_find_tree_t)_find_symbol(dll, "omni_find_tree");
+		_iface.free_tree = (OmniIface_free_tree_t)_find_symbol(dll, "omni_tree_free");
+
+		_iface.find_variable_i8 = (OmniIface_find_variable_i8_t)_find_symbol(dll, "omni_find_variable_i8");
+		_iface.find_variable_i16 = (OmniIface_find_variable_i16_t)_find_symbol(dll, "omni_find_variable_i16");
+		_iface.find_variable_i32 = (OmniIface_find_variable_i32_t)_find_symbol(dll, "omni_find_variable_i32");
+		_iface.find_variable_i64 = (OmniIface_find_variable_i64_t)_find_symbol(dll, "omni_find_variable_i64");
+
+		_iface.find_variable_u8 = (OmniIface_find_variable_u8_t)_find_symbol(dll, "omni_find_variable_u8");
+		_iface.find_variable_u16 = (OmniIface_find_variable_u16_t)_find_symbol(dll, "omni_find_variable_u16");
+		_iface.find_variable_u32 = (OmniIface_find_variable_u32_t)_find_symbol(dll, "omni_find_variable_u32");
+		_iface.find_variable_u64 = (OmniIface_find_variable_u64_t)_find_symbol(dll, "omni_find_variable_u64");
+
+		_iface.find_variable_float = (OmniIface_find_variable_float_t)_find_symbol(dll, "omni_find_variable_float");
+		_iface.find_variable_double = (OmniIface_find_variable_double_t)_find_symbol(dll, "omni_find_variable_double");
+		_iface.find_variable_string = (OmniIface_find_variable_string_t)_find_symbol(dll, "omni_find_variable_string");
+
+		_iface.list_variables = (OmniIface_list_variables_t)_find_symbol(dll, "omni_list_variables");
+		_iface.free_variables = (OmniIface_free_variables_t)_find_symbol(dll, "omni_free_variables");
+
+		_iface.variable_path = (OmniIface_variable_path_t)_find_symbol(dll, "omni_variable_path");
+		_iface.variable_type = (OmniIface_variable_type_t)_find_symbol(dll, "omni_variable_type");
+		_iface.variable_size = (OmniIface_variable_size_t)_find_symbol(dll, "omni_variable_size");
+		_iface.variable_is_alias = (OmniIface_variable_is_alias_t)_find_symbol(dll, "omni_variable_is_alias");
+		_iface.variable_alias_target_path = (OmniIface_variable_alias_target_path_t)_find_symbol(dll, "omni_variable_alias_target_path");
+
+		_iface.variable_free = (OmniIface_variable_free_t)_find_symbol(dll, "omni_variable_free");
+		_iface.variable_clone = (OmniIface_variable_clone_t)_find_symbol(dll, "omni_variable_clone");
+		_iface.variable_has_changed = (OmniIface_variable_has_changed_t)_find_symbol(dll, "omni_variable_has_changed");
+
+		_iface.read_variable_i8 = (OmniIface_read_variable_i8_t)_find_symbol(dll, "omni_read_variable_i8");
+		_iface.read_variable_i16 = (OmniIface_read_variable_i16_t)_find_symbol(dll, "omni_read_variable_i16");
+		_iface.read_variable_i32 = (OmniIface_read_variable_i32_t)_find_symbol(dll, "omni_read_variable_i32");
+		_iface.read_variable_i64 = (OmniIface_read_variable_i64_t)_find_symbol(dll, "omni_read_variable_i64");
+
+		_iface.read_variable_u8 = (OmniIface_read_variable_u8_t)_find_symbol(dll, "omni_read_variable_u8");
+		_iface.read_variable_u16 = (OmniIface_read_variable_u16_t)_find_symbol(dll, "omni_read_variable_u16");
+		_iface.read_variable_u32 = (OmniIface_read_variable_u32_t)_find_symbol(dll, "omni_read_variable_u32");
+		_iface.read_variable_u64 = (OmniIface_read_variable_u64_t)_find_symbol(dll, "omni_read_variable_u64");
+
+		_iface.read_variable_float = (OmniIface_read_variable_float_t)_find_symbol(dll, "omni_read_variable_float");
+		_iface.read_variable_double = (OmniIface_read_variable_double_t)_find_symbol(dll, "omni_read_variable_double");
+		_iface.read_variable_string = (OmniIface_read_variable_string_t)_find_symbol(dll, "omni_read_variable_string");
+
+		_iface.write_variable_i8 = (OmniIface_write_variable_i8_t)_find_symbol(dll, "omni_write_variable_i8");
+		_iface.write_variable_i16 = (OmniIface_write_variable_i16_t)_find_symbol(dll, "omni_write_variable_i16");
+		_iface.write_variable_i32 = (OmniIface_write_variable_i32_t)_find_symbol(dll, "omni_write_variable_i32");
+		_iface.write_variable_i64 = (OmniIface_write_variable_i64_t)_find_symbol(dll, "omni_write_variable_i64");
+
+		_iface.write_variable_u8 = (OmniIface_write_variable_u8_t)_find_symbol(dll, "omni_write_variable_u8");
+		_iface.write_variable_u16 = (OmniIface_write_variable_u16_t)_find_symbol(dll, "omni_write_variable_u16");
+		_iface.write_variable_u32 = (OmniIface_write_variable_u32_t)_find_symbol(dll, "omni_write_variable_u32");
+		_iface.write_variable_u64 = (OmniIface_write_variable_u64_t)_find_symbol(dll, "omni_write_variable_u64");
+
+		_iface.write_variable_float = (OmniIface_write_variable_float_t)_find_symbol(dll, "omni_write_variable_float");
+		_iface.write_variable_double = (OmniIface_write_variable_double_t)_find_symbol(dll, "omni_write_variable_double");
+		_iface.write_variable_string = (OmniIface_write_variable_string_t)_find_symbol(dll, "omni_write_variable_string");
+	}
 }
 
 void omni_init_set_library_path(const char* library_path)

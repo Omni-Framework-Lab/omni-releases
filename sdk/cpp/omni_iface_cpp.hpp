@@ -3,11 +3,11 @@
 #include <iostream>
 #include <type_traits>
 #include <vector>
+#include <memory>
 
 namespace omni
 {
-	class Tree;
-
+	/*! ... */
 	class Variable
 	{
 	protected:
@@ -44,6 +44,56 @@ namespace omni
 		Omni_Variable* _cvar = nullptr;
 	};
 
+
+	/*! ... */
+	class Tree
+	{
+	public:
+		std::string _id;
+		Omni_Tree* _ctree = nullptr;
+
+		Tree()
+		{}
+
+		Tree(std::string id)
+		: _id(id)
+		{
+			_ctree = omni_find_tree(id.c_str());
+		}
+
+		Tree(const Tree& other)
+		: Tree(other._id.c_str())
+		{}
+
+		Tree& operator=(const Tree& other)
+		{
+			if (this == &other)
+				return *this;
+
+			if (_ctree)
+				omni_tree_free(_ctree);
+
+			_id = other._id;
+			_ctree = omni_find_tree(_id.c_str());
+			return *this;
+		}
+
+		~Tree()
+		{
+			if (_ctree)
+				omni_tree_free(_ctree);
+		}
+
+		bool is_valid() const
+		{
+			return _ctree;
+		}
+
+		std::vector<std::shared_ptr<Variable>> list_variables() const;
+	};
+
+
+	/*! ... */
 	template<typename T>
 	class VariableT : public Variable
 	{
@@ -128,6 +178,9 @@ namespace omni
 			}
 			return *this;
 		}
+
+		~VariableT() override
+		{}
 
 		bool is_valid() const
 		{
@@ -246,108 +299,67 @@ namespace omni
 		}
 	};
 
+	///////////////////////////////////////////////////////////////////
+	// Tree definition
+	///////////////////////////////////////////////////////////////////
 
-	class Tree
+	inline std::vector<std::shared_ptr<Variable>> Tree::list_variables() const
 	{
-	public:
-		std::string _id;
-		Omni_Tree* _ctree = nullptr;
+		int len = 0;
+		Omni_Variable** vars = omni_list_variables(_ctree, &len);
 
-		Tree()
-		{}
+		std::vector<std::shared_ptr<Variable>> variables;
+		variables.reserve(len);
 
-		Tree(std::string id)
-			: _id(id)
+		for (int i = 0; i < len; ++i)
 		{
-			_ctree = omni_find_tree(id.c_str());
-		}
+			Omni_Variable* var = vars[i];
+			const char* path = omni_variable_path(var);
+			const auto type = omni_variable_type(var);
 
-		Tree(const Tree& other)
-			: Tree(other._id.c_str())
-		{}
-
-		Tree& operator=(const Tree& other)
-		{
-			if (this == &other)
-				return *this;
-
-			if (_ctree)
+			switch (type)
 			{
-				omni_tree_free(_ctree);
+				case OMNI_INT8:
+					variables.push_back(std::make_shared<VariableT<int8_t>>(*this, path));
+					break;
+				case OMNI_INT16:
+					variables.push_back(std::make_shared<VariableT<int16_t>>(*this, path));
+					break;
+				case OMNI_INT32:
+					variables.push_back(std::make_shared<VariableT<int32_t>>(*this, path));
+					break;
+				case OMNI_INT64:
+					variables.push_back(std::make_shared<VariableT<int64_t>>(*this, path));
+					break;
+				case OMNI_UINT8:
+					variables.push_back(std::make_shared<VariableT<uint8_t>>(*this, path));
+					break;
+				case OMNI_UINT16:
+					variables.push_back(std::make_shared<VariableT<uint16_t>>(*this, path));
+					break;
+				case OMNI_UINT32:
+					variables.push_back(std::make_shared<VariableT<uint32_t>>(*this, path));
+					break;
+				case OMNI_UINT64:
+					variables.push_back(std::make_shared<VariableT<uint64_t>>(*this, path));
+					break;
+				case OMNI_FLOAT:
+					variables.push_back(std::make_shared<VariableT<float>>(*this, path));
+					break;
+				case OMNI_DOUBLE:
+					variables.push_back(std::make_shared<VariableT<double>>(*this, path));
+					break;
+				case OMNI_STRING:
+					variables.push_back(std::make_shared<VariableT<std::string>>(*this, path));
+					break;
+				default:
+					std::cerr << "Unknown variable type: " << static_cast<int>(type) << " for variable with path: " << path << std::endl;
+					exit(1);
+					break;
 			}
-			_id = other._id;
-			_ctree = omni_find_tree(_id.c_str());
-			return *this;
 		}
+		omni_free_variables(vars);
+		return variables;
+	}
 
-		~Tree()
-		{
-			if (_ctree)
-				omni_tree_free(_ctree);
-		}
-
-		bool is_valid() const
-		{
-			return _ctree;
-		}
-
-		std::vector<std::shared_ptr<Variable>> list_variables() const
-		{
-			int len = 0;
-			Omni_Variable** vars = omni_list_variables(_ctree, &len);
-
-			std::vector<std::shared_ptr<Variable>> variables;
-			variables.reserve(len);
-
-			for (int i = 0; i < len; ++i)
-			{
-				Omni_Variable* var = vars[i];
-				const char* path = omni_variable_path(var);
-				const auto type = omni_variable_type(var);
-
-				switch (type)
-				{
-					case OMNI_INT8:
-						variables.push_back(std::make_shared<VariableT<int8_t>>(*this, path));
-						break;
-					case OMNI_INT16:
-						variables.push_back(std::make_shared<VariableT<int16_t>>(*this, path));
-						break;
-					case OMNI_INT32:
-						variables.push_back(std::make_shared<VariableT<int32_t>>(*this, path));
-						break;
-					case OMNI_INT64:
-						variables.push_back(std::make_shared<VariableT<int64_t>>(*this, path));
-						break;
-					case OMNI_UINT8:
-						variables.push_back(std::make_shared<VariableT<uint8_t>>(*this, path));
-						break;
-					case OMNI_UINT16:
-						variables.push_back(std::make_shared<VariableT<uint16_t>>(*this, path));
-						break;
-					case OMNI_UINT32:
-						variables.push_back(std::make_shared<VariableT<uint32_t>>(*this, path));
-						break;
-					case OMNI_UINT64:
-						variables.push_back(std::make_shared<VariableT<uint64_t>>(*this, path));
-						break;
-					case OMNI_FLOAT:
-						variables.push_back(std::make_shared<VariableT<float>>(*this, path));
-						break;
-					case OMNI_DOUBLE:
-						variables.push_back(std::make_shared<VariableT<double>>(*this, path));
-						break;
-					case OMNI_STRING:
-						variables.push_back(std::make_shared<VariableT<std::string>>(*this, path));
-						break;
-					default:
-						std::cerr << "Unknown variable type: " << static_cast<int>(type) << " for variable with path: " << path << std::endl;
-						exit(1);
-						break;
-				}
-			}
-			omni_free_variables(vars);
-			return variables;
-		}
-	};
 }
